@@ -11,7 +11,7 @@ namespace MultiChartsClientCS
 {
     class Program
     {
-        private const string dllAddress = "C:\\Users\\magic\\source\\repos\\MultiChartsDLL\\x64\\Debug\\MultiChartsDLL.dll";
+        private const string dllAddress = "C:\\Users\\magic\\source\\repos\\MultiChartsDLL\\x64\\Release\\MultiChartsDLL.dll";
 
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "??0MultiCharts@@QEAA@XZ")]
         public static extern IntPtr CreateMultiCharts();
@@ -49,6 +49,15 @@ namespace MultiChartsClientCS
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetDoubleArray@MultiCharts@@QEAAPEANXZ")]
         public static extern IntPtr GetDoubleArray(IntPtr multiCharts);
 
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetPythonStringData@MultiCharts@@QEAAPEADXZ")]
+        public static extern IntPtr GetPythonStringData(IntPtr multiCharts);
+
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitPythonStringData@MultiCharts@@QEAAXH@Z")]
+        public static extern void InitPythonStringData(IntPtr multiCharts, int size);
+
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetPythonStringData@MultiCharts@@QEAAXPEAD@Z")]
+        public static extern void SetPythonStringData(IntPtr multiCharts, char[] pythonStringData);
+
         static void Main(string[] args)
         {
             HiPerfTimer pt = new HiPerfTimer();
@@ -79,16 +88,23 @@ namespace MultiChartsClientCS
                     sr.Write(" ");
                     sr.WriteLine(arrayElement);
                 }
-
             }
             
             int stringSize = 10;
             char[] charStringData = new char[stringSize];
             InitStringData(multiCharts, stringSize);
-            SetStringData(multiCharts, "HelloWorld".ToCharArray());
+            SetStringData(multiCharts, "H21odWorld".ToCharArray());
             IntPtr stringDataPointer = GetStringData(multiCharts);
             string stringData = Marshal.PtrToStringAnsi(stringDataPointer, stringSize);
             Console.WriteLine(stringData);
+
+            int pythonStringSize = 5;
+            char[] pythonCharStringData = new char[pythonStringSize];
+            InitPythonStringData(multiCharts, pythonStringSize);
+            SetPythonStringData(multiCharts, "0000".ToCharArray());
+            IntPtr pythonStringDataPointer = GetPythonStringData(multiCharts);
+            string pythonStringData = Marshal.PtrToStringAnsi(pythonStringDataPointer, pythonStringSize);
+            Console.WriteLine(pythonStringData);
 
             DisposeMultiCharts(multiCharts);
             multiCharts = IntPtr.Zero;
