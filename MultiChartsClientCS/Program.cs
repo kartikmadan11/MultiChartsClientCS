@@ -93,7 +93,7 @@ namespace MultiChartsClientCS
             int stringSize = 10;
             char[] charStringData = new char[stringSize];
             InitStringData(multiCharts, stringSize);
-            SetStringData(multiCharts, "H21odWorld".ToCharArray());
+            SetStringData(multiCharts, "Helloworld".ToCharArray());
             IntPtr stringDataPointer = GetStringData(multiCharts);
             string stringData = Marshal.PtrToStringAnsi(stringDataPointer, stringSize);
             Console.WriteLine(stringData);
