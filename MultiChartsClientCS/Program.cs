@@ -19,52 +19,22 @@ namespace MultiChartsClientCS
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "??1MultiCharts@@QEAA@XZ")]
         public static extern void DisposeMultiCharts(IntPtr multiCharts);
 
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetIntNumber@MultiCharts@@QEAAXH@Z")]
-        public static extern void SetIntNumber(IntPtr multiCharts, int intNumber);
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitTrainingData@MultiCharts@@QEAAXH@Z")]
+        public static extern void InitTrainingData(IntPtr multiCharts, int size);
 
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetIntNumber@MultiCharts@@QEAAHXZ")]
-        public static extern int GetIntNumber(IntPtr multiCharts);
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetTrainingData@MultiCharts@@QEAAXPEAN@Z")]
+        public static extern void SetTrainingData(IntPtr multiCharts, double[] trainingData);
 
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetDoubleNumber@MultiCharts@@QEAANXZ")]
-        public static extern double GetDoubleNumber(IntPtr multiCharts);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetDoubleNumber@MultiCharts@@QEAAXN@Z")]
-        public static extern void SetDoubleNumber(IntPtr multiCharts, double doubleNumber);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitStringData@MultiCharts@@QEAAXH@Z")]
-        public static extern void InitStringData(IntPtr multiCharts, int size);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetStringData@MultiCharts@@QEAAPEADXZ")]
-        public static extern IntPtr GetStringData(IntPtr multiCharts);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetStringData@MultiCharts@@QEAAXPEAD@Z")]
-        public static extern void SetStringData(IntPtr multiCharts, char[] stringData);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitDoubleArray@MultiCharts@@QEAAXH@Z")]
-        public static extern void InitDoubleArray(IntPtr multiCharts, int size);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetDoubleArray@MultiCharts@@QEAAXPEAN@Z")]
-        public static extern void SetDoubleArray(IntPtr multiCharts, double[] doubleArray);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetDoubleArray@MultiCharts@@QEAAPEANXZ")]
-        public static extern IntPtr GetDoubleArray(IntPtr multiCharts);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?GetPythonStringData@MultiCharts@@QEAAPEADXZ")]
-        public static extern IntPtr GetPythonStringData(IntPtr multiCharts);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitPythonStringData@MultiCharts@@QEAAXH@Z")]
-        public static extern void InitPythonStringData(IntPtr multiCharts, int size);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetPythonStringData@MultiCharts@@QEAAXPEAD@Z")]
-        public static extern void SetPythonStringData(IntPtr multiCharts, char[] pythonStringData);
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?TrainModel@MultiCharts@@QEAANXZ")]
+        public static extern double TrainModel(IntPtr multiCharts);
 
         static void Main(string[] args)
         {
             HiPerfTimer pt = new HiPerfTimer();
             pt.Start();
             IntPtr multiCharts = CreateMultiCharts();
-            pt.Stop();
-            Console.WriteLine(pt.Duration);
+
+            /*
             Random random = new Random();
             int resultSize = 510000;
             double[] result = new double[resultSize];
@@ -105,9 +75,18 @@ namespace MultiChartsClientCS
             IntPtr pythonStringDataPointer = GetPythonStringData(multiCharts);
             string pythonStringData = Marshal.PtrToStringAnsi(pythonStringDataPointer, pythonStringSize);
             Console.WriteLine(pythonStringData);
+            */
+
+            InitTrainingData(multiCharts, 10);
+            SetTrainingData(multiCharts, new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10.012 });
+
+            Console.WriteLine(TrainModel(multiCharts));
 
             DisposeMultiCharts(multiCharts);
+
             multiCharts = IntPtr.Zero;
+            pt.Stop();
+            Console.WriteLine(pt.Duration);
         }
     }
 }
