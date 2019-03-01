@@ -82,7 +82,7 @@ namespace MultiChartsClientCS
 
             Console.WriteLine(TrainModel(multiCharts));
 
-            DisposeMultiCharts(multiCharts);
+            //DisposeMultiCharts(multiCharts);
 
             multiCharts = IntPtr.Zero;
             pt.Stop();
