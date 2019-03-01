@@ -63,8 +63,7 @@ namespace MultiChartsClientCS
             HiPerfTimer pt = new HiPerfTimer();
             pt.Start();
             IntPtr multiCharts = CreateMultiCharts();
-            pt.Stop();
-            Console.WriteLine(pt.Duration);
+            
             Random random = new Random();
             int resultSize = 510000;
             double[] result = new double[resultSize];
@@ -106,8 +105,10 @@ namespace MultiChartsClientCS
             string pythonStringData = Marshal.PtrToStringAnsi(pythonStringDataPointer, pythonStringSize);
             Console.WriteLine(pythonStringData);
 
-            DisposeMultiCharts(multiCharts);
+            //DisposeMultiCharts(multiCharts);
             multiCharts = IntPtr.Zero;
+            pt.Stop();
+            Console.WriteLine(pt.Duration);
         }
     }
 }
