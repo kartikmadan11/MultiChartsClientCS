@@ -33,7 +33,6 @@ namespace MultiChartsClientCS
             HiPerfTimer pt = new HiPerfTimer();
             pt.Start();
             IntPtr multiCharts = CreateMultiCharts();
-
             /*
             Random random = new Random();
             int resultSize = 510000;
@@ -41,7 +40,7 @@ namespace MultiChartsClientCS
             double[] input = new double[resultSize];
             long maximum = 132903000000;
             long minimum = 0;
-            for(int i = 0; i < resultSize; i++)
+            for (int i = 0; i < resultSize; i++)
             {
                 input[i] = random.NextDouble() * (maximum - minimum) + minimum;
             }
@@ -49,17 +48,17 @@ namespace MultiChartsClientCS
             SetDoubleArray(multiCharts, input);
             IntPtr arrayPointer = GetDoubleArray(multiCharts);
             Marshal.Copy(arrayPointer, result, 0, resultSize);
-            using(StreamWriter sr = new StreamWriter("arrayDataFile.txt"))
+            using (StreamWriter sr = new StreamWriter("arrayDataFile.txt"))
             {
                 int i = 0;
-                foreach(var arrayElement in result)
+                foreach (var arrayElement in result)
                 {
                     sr.Write(++i);
                     sr.Write(" ");
                     sr.WriteLine(arrayElement);
                 }
             }
-            
+
             int stringSize = 10;
             char[] charStringData = new char[stringSize];
             InitStringData(multiCharts, stringSize);
@@ -83,7 +82,6 @@ namespace MultiChartsClientCS
             Console.WriteLine(TrainModel(multiCharts));
 
             //DisposeMultiCharts(multiCharts);
-
             multiCharts = IntPtr.Zero;
             pt.Stop();
             Console.WriteLine(pt.Duration);
