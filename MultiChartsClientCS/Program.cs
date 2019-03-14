@@ -25,6 +25,12 @@ namespace MultiChartsClientCS
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetTrainingData@MultiCharts@@QEAAXPEAN@Z")]
         public static extern void SetTrainingData(IntPtr multiCharts, double[] trainingData);
 
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitDateArray@MultiCharts@@QEAAXH@Z")]
+        public static extern double InitDateArray(IntPtr multiCharts, int size);
+
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetDateArray@MultiCharts@@QEAAXPEAD@Z")]
+        public static extern double SetDateArray(IntPtr multiCharts, char[] dateArray);
+
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?TrainModel@MultiCharts@@QEAANXZ")]
         public static extern double TrainModel(IntPtr multiCharts);
 
@@ -33,22 +39,49 @@ namespace MultiChartsClientCS
             HiPerfTimer pt = new HiPerfTimer();
             pt.Start();
             IntPtr multiCharts = CreateMultiCharts();
-            /*
+         
             Random random = new Random();
             int resultSize = 510000;
             double[] result = new double[resultSize];
             double[] input = new double[resultSize];
+            double sum = 0;
             long maximum = 132903000000;
             long minimum = 0;
             for (int i = 0; i < resultSize; i++)
             {
                 input[i] = random.NextDouble() * (maximum - minimum) + minimum;
+                sum += input[i];
             }
-            InitDoubleArray(multiCharts, resultSize);
-            SetDoubleArray(multiCharts, input);
-            IntPtr arrayPointer = GetDoubleArray(multiCharts);
-            Marshal.Copy(arrayPointer, result, 0, resultSize);
-            using (StreamWriter sr = new StreamWriter("arrayDataFile.txt"))
+            
+            InitTrainingData(multiCharts, resultSize);
+            SetTrainingData(multiCharts, input);
+
+            const int dateWidth = 20;
+            int dateArraySize = 12* dateWidth;
+
+            char[] dateArray = new char[dateArraySize];
+
+            DateTime dt = new DateTime();
+            Console.WriteLine(dt.ToString().Length);
+            for(int i = 0; i < dateArraySize; i+=dateWidth)
+            {
+                char[] date = dt.ToString().ToCharArray();
+                for(int j = 0; j < dateWidth; j++)
+                {
+                    dateArray[i+j] = date[j];
+                }
+            }
+            //Console.WriteLine(dateArray);
+
+            InitDateArray(multiCharts, dateArraySize);
+            SetDateArray(multiCharts, dateArray);
+
+            Console.WriteLine(TrainModel(multiCharts));
+
+            //IntPtr arrayPointer = GetDoubleArray(multiCharts);
+            //Marshal.Copy(arrayPointer, result, 0, resultSize);
+
+            /*using (StreamWriter sr = new StreamWriter("arrayDataFile.txt"))
             {
                 int i = 0;
                 foreach (var arrayElement in result)
@@ -66,22 +99,14 @@ namespace MultiChartsClientCS
             IntPtr stringDataPointer = GetStringData(multiCharts);
             string stringData = Marshal.PtrToStringAnsi(stringDataPointer, stringSize);
             Console.WriteLine(stringData);
-
-            int pythonStringSize = 5;
-            char[] pythonCharStringData = new char[pythonStringSize];
-            InitPythonStringData(multiCharts, pythonStringSize);
-            SetPythonStringData(multiCharts, "0000".ToCharArray());
-            IntPtr pythonStringDataPointer = GetPythonStringData(multiCharts);
-            string pythonStringData = Marshal.PtrToStringAnsi(pythonStringDataPointer, pythonStringSize);
-            Console.WriteLine(pythonStringData);
             */
 
-            InitTrainingData(multiCharts, 10);
-            SetTrainingData(multiCharts, new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10.012 });
+            //            InitTrainingData(multiCharts, 10);
+            //           SetTrainingData(multiCharts, new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10.012 });
 
-            Console.WriteLine(TrainModel(multiCharts));
+//            Console.WriteLine(TrainModel(multiCharts) + " " + sum);
 
-            //DisposeMultiCharts(multiCharts);
+           // DisposeMultiCharts(multiCharts);
             multiCharts = IntPtr.Zero;
             pt.Stop();
             Console.WriteLine(pt.Duration);
