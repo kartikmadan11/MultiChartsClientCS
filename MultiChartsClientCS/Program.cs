@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Runtime.InteropServices;
 using Win32;
+using System.Threading;
 
 namespace MultiChartsClientCS
 {
@@ -29,7 +30,7 @@ namespace MultiChartsClientCS
         public static extern double InitDateArray(IntPtr multiCharts, int size);
 
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetDateArray@MultiCharts@@QEAAXPEAD@Z")]
-        public static extern double SetDateArray(IntPtr multiCharts, char[] dateArray);
+        public static extern void SetDateArray(IntPtr multiCharts, char[] dateArray);
 
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?TrainModel@MultiCharts@@QEAANXZ")]
         public static extern double TrainModel(IntPtr multiCharts);
@@ -41,8 +42,7 @@ namespace MultiChartsClientCS
             IntPtr multiCharts = CreateMultiCharts();
          
             Random random = new Random();
-            int resultSize = 510000;
-            double[] result = new double[resultSize];
+            int resultSize = 600;
             double[] input = new double[resultSize];
             double sum = 0;
             long maximum = 132903000000;
@@ -57,56 +57,29 @@ namespace MultiChartsClientCS
             SetTrainingData(multiCharts, input);
 
             const int dateWidth = 20;
-            int dateArraySize = 12* dateWidth;
+            int dateArraySize = resultSize* dateWidth;
 
             char[] dateArray = new char[dateArraySize];
-
-            DateTime dt = new DateTime();
+            DateTime dt = DateTime.Now;
             Console.WriteLine(dt.ToString().Length);
-            for(int i = 0; i < dateArraySize; i+=dateWidth)
+            for (int i = 0; i < dateArraySize; i+=dateWidth)
             {
                 char[] date = dt.ToString().ToCharArray();
                 for(int j = 0; j < dateWidth; j++)
                 {
                     dateArray[i+j] = date[j];
                 }
+                dt = dt.AddMilliseconds(2000);
             }
-            //Console.WriteLine(dateArray);
-
-            InitDateArray(multiCharts, dateArraySize);
+            Console.WriteLine(dt.ToString());
+            Console.WriteLine(dateArraySize);
+            
+            InitDateArray(multiCharts, resultSize);
             SetDateArray(multiCharts, dateArray);
 
             Console.WriteLine(TrainModel(multiCharts));
 
-            //IntPtr arrayPointer = GetDoubleArray(multiCharts);
-            //Marshal.Copy(arrayPointer, result, 0, resultSize);
-
-            /*using (StreamWriter sr = new StreamWriter("arrayDataFile.txt"))
-            {
-                int i = 0;
-                foreach (var arrayElement in result)
-                {
-                    sr.Write(++i);
-                    sr.Write(" ");
-                    sr.WriteLine(arrayElement);
-                }
-            }
-
-            int stringSize = 10;
-            char[] charStringData = new char[stringSize];
-            InitStringData(multiCharts, stringSize);
-            SetStringData(multiCharts, "Helloworld".ToCharArray());
-            IntPtr stringDataPointer = GetStringData(multiCharts);
-            string stringData = Marshal.PtrToStringAnsi(stringDataPointer, stringSize);
-            Console.WriteLine(stringData);
-            */
-
-            //            InitTrainingData(multiCharts, 10);
-            //           SetTrainingData(multiCharts, new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10.012 });
-
-//            Console.WriteLine(TrainModel(multiCharts) + " " + sum);
-
-           // DisposeMultiCharts(multiCharts);
+            DisposeMultiCharts(multiCharts);
             multiCharts = IntPtr.Zero;
             pt.Stop();
             Console.WriteLine(pt.Duration);
