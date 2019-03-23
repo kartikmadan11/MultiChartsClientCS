@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Runtime.InteropServices;
 using Win32;
-using System.Threading;
 
 namespace MultiChartsClientCS
 {
@@ -82,7 +81,7 @@ namespace MultiChartsClientCS
             DisposeMultiCharts(multiCharts);
             multiCharts = IntPtr.Zero;
             pt.Stop();
-            Console.WriteLine(pt.Duration);
+            Console.WriteLine("Duration : " +  pt.Duration.ToString() + 's');
         }
     }
 }
