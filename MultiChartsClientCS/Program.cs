@@ -37,18 +37,17 @@ namespace MultiChartsClientCS
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetFileName@MultiCharts@@QEAAXPEAD@Z")]
         public static extern void SetFileName(IntPtr multiCharts, char[] fileName);
 
-
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetEpochs@MultiCharts@@QEAAXH@Z")]
         public static extern void SetEpochs(IntPtr multiCharts, int epochs);
 
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetScale@MultiCharts@@QEAAXH@Z")]
-        public static extern void SetScale(IntPtr multiCharts, int epochs);
+        public static extern void SetScale(IntPtr multiCharts, int scale);
 
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetLearningRate@MultiCharts@@QEAAXN@Z")]
-        public static extern void SetLearningRate(IntPtr multiCharts, double epochs);
+        public static extern void SetLearningRate(IntPtr multiCharts, double learningRate);
 
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetOptimizer@MultiCharts@@QEAAXH@Z")]
-        public static extern void SetOptimizer(IntPtr multiCharts, int epochs);
+        public static extern void SetOptimizer(IntPtr multiCharts, int optimizer);
 
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetMomentum@MultiCharts@@QEAAXH@Z")]
         public static extern void SetMomentum(IntPtr multiCharts, int momentum);
@@ -100,12 +99,15 @@ namespace MultiChartsClientCS
 
             char[] fileName = "modelLSTM".ToCharArray();
             InitFileName(multiCharts, fileName.Length);
+            Console.WriteLine(fileName.Length);
+            Console.WriteLine(fileName);
             SetFileName(multiCharts, fileName);
 
-            SetEpochs(multiCharts, 5);
+            SetEpochs(multiCharts, 2);
             SetLearningRate(multiCharts, 0.1);
             SetScale(multiCharts, 100);
-            SetOptimizer(multiCharts, 1);
+            SetOptimizer(multiCharts, 0);
+            SetMomentum(multiCharts, 10);
 
             Console.WriteLine(TrainModel(multiCharts));
 
