@@ -31,6 +31,28 @@ namespace MultiChartsClientCS
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetDateArray@MultiCharts@@QEAAXPEAD@Z")]
         public static extern void SetDateArray(IntPtr multiCharts, char[] dateArray);
 
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitFileName@MultiCharts@@QEAAXH@Z")]
+        public static extern double InitFileName(IntPtr multiCharts, int size);
+
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetFileName@MultiCharts@@QEAAXPEAD@Z")]
+        public static extern void SetFileName(IntPtr multiCharts, char[] fileName);
+
+
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetEpochs@MultiCharts@@QEAAXH@Z")]
+        public static extern void SetEpochs(IntPtr multiCharts, int epochs);
+
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetScale@MultiCharts@@QEAAXH@Z")]
+        public static extern void SetScale(IntPtr multiCharts, int epochs);
+
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetLearningRate@MultiCharts@@QEAAXN@Z")]
+        public static extern void SetLearningRate(IntPtr multiCharts, double epochs);
+
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetOptimizer@MultiCharts@@QEAAXH@Z")]
+        public static extern void SetOptimizer(IntPtr multiCharts, int epochs);
+
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetMomentum@MultiCharts@@QEAAXH@Z")]
+        public static extern void SetMomentum(IntPtr multiCharts, int momentum);
+
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?TrainModel@MultiCharts@@QEAANXZ")]
         public static extern double TrainModel(IntPtr multiCharts);
 
@@ -75,6 +97,15 @@ namespace MultiChartsClientCS
             
             InitDateArray(multiCharts, resultSize);
             SetDateArray(multiCharts, dateArray);
+
+            char[] fileName = "modelLSTM".ToCharArray();
+            InitFileName(multiCharts, fileName.Length);
+            SetFileName(multiCharts, fileName);
+
+            SetEpochs(multiCharts, 5);
+            SetLearningRate(multiCharts, 0.1);
+            SetScale(multiCharts, 100);
+            SetOptimizer(multiCharts, 1);
 
             Console.WriteLine(TrainModel(multiCharts));
 
