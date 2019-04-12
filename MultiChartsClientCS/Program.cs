@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Win32;
 
 namespace MultiChartsClientCS
@@ -25,11 +25,23 @@ namespace MultiChartsClientCS
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetTrainingData@MultiCharts@@QEAAXPEAN@Z")]
         public static extern void SetTrainingData(IntPtr multiCharts, double[] trainingData);
 
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitTestingData@MultiCharts@@QEAAXH@Z")]
+        public static extern void InitTestingData(IntPtr multiCharts, int size);
+
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetTestingData@MultiCharts@@QEAAXPEAN@Z")]
+        public static extern void SetTestingData(IntPtr multiCharts, double[] testingData);
+
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitDateArray@MultiCharts@@QEAAXH@Z")]
         public static extern double InitDateArray(IntPtr multiCharts, int size);
 
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetDateArray@MultiCharts@@QEAAXPEAD@Z")]
         public static extern void SetDateArray(IntPtr multiCharts, char[] dateArray);
+
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitTestDateArray@MultiCharts@@QEAAXH@Z")]
+        public static extern double InitTestDateArray(IntPtr multiCharts, int size);
+
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetTestDateArray@MultiCharts@@QEAAXPEAD@Z")]
+        public static extern void SetTestDateArray(IntPtr multiCharts, char[] testDateArray);
 
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitFileName@MultiCharts@@QEAAXH@Z")]
         public static extern double InitFileName(IntPtr multiCharts, int size);
@@ -52,51 +64,69 @@ namespace MultiChartsClientCS
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetMomentum@MultiCharts@@QEAAXH@Z")]
         public static extern void SetMomentum(IntPtr multiCharts, int momentum);
 
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetTestingWeight@MultiCharts@@QEAAXN@Z")]
+        public static extern void SetTestingWeight(IntPtr multiCharts, double testingWeight);
+
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?TrainModel@MultiCharts@@QEAANXZ")]
         public static extern double TrainModel(IntPtr multiCharts);
 
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?TestModel@MultiCharts@@QEAANXZ")]
+        public static extern double TestModel(IntPtr multiCharts);
+
+        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            // Log the exception, display it, etc
+            Debug.WriteLine((e.ExceptionObject as Exception).Message);
+        }
+
         static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+
             HiPerfTimer pt = new HiPerfTimer();
             pt.Start();
             IntPtr multiCharts = CreateMultiCharts();
-         
-            Random random = new Random();
-            int resultSize = 600;
-            double[] input = new double[resultSize];
-            double sum = 0;
-            long maximum = 132903000000;
-            long minimum = 0;
-            for (int i = 0; i < resultSize; i++)
+
+            var dateList = new List<string>();
+            var dataList = new List<string>();
+            using (var rd = new StreamReader("C:\\Users\\magic\\Jupyter Notebooks\\MultiCharts\\input\\abc_k.csv"))
             {
-                input[i] = random.NextDouble() * (maximum - minimum) + minimum;
-                sum += input[i];
+                while (!rd.EndOfStream)
+                {
+                    var splits = rd.ReadLine().Split(',');
+                    dateList.Add(splits[0]);
+                    dataList.Add(splits[1]);
+                }
             }
-            
+
+            dateList.RemoveAt(0);
+            dataList.RemoveAt(0);
+
+            int resultSize = 200; // must be greater than rnn window(60)
+            double[] input = Array.ConvertAll(dataList.Take(resultSize).ToArray(), new Converter<string, double>(Double.Parse));
+
             InitTrainingData(multiCharts, resultSize);
             SetTrainingData(multiCharts, input);
 
-            const int dateWidth = 20;
+            const int dateWidth = 10;
             int dateArraySize = resultSize* dateWidth;
 
             char[] dateArray = new char[dateArraySize];
-            DateTime dt = DateTime.Now;
-            Console.WriteLine(dt.ToString().Length);
-            for (int i = 0; i < dateArraySize; i+=dateWidth)
+            string[] dateArrayString = dateList.Take(resultSize).ToArray();
+            Console.WriteLine(dateArrayString[1]);
+
+            for (int i = 0; i < dateArraySize; i += dateWidth)
             {
-                char[] date = dt.ToString().ToCharArray();
-                for(int j = 0; j < dateWidth; j++)
+                char[] date = dateArrayString[i/dateWidth].ToCharArray();
+                for (int j = 0; j < dateWidth; j++)
                 {
-                    dateArray[i+j] = date[j];
+                    dateArray[i + j] = date[j];
                 }
-                dt = dt.AddMilliseconds(2000);
             }
-            Console.WriteLine(dt.ToString());
-            Console.WriteLine(dateArraySize);
-            
+
             InitDateArray(multiCharts, resultSize);
             SetDateArray(multiCharts, dateArray);
-
+            
             char[] fileName = "modelLSTM".ToCharArray();
             InitFileName(multiCharts, fileName.Length);
             Console.WriteLine(fileName.Length);
@@ -104,16 +134,52 @@ namespace MultiChartsClientCS
             SetFileName(multiCharts, fileName);
 
             SetEpochs(multiCharts, 2);
-            SetLearningRate(multiCharts, 0.1);
+            SetLearningRate(multiCharts, 0.001);
             SetScale(multiCharts, 100);
             SetOptimizer(multiCharts, 0);
             SetMomentum(multiCharts, 10);
 
             Console.WriteLine(TrainModel(multiCharts));
 
+            int testSize = 50; // must be greater than rnn window(60)
+            double[] testSet = Array.ConvertAll(dataList.Skip(resultSize).Take(testSize).ToArray(), new Converter<string, double>(double.Parse));
+            Console.WriteLine(testSet.Length);
+
+            InitTestingData(multiCharts, testSize);
+            SetTestingData(multiCharts, testSet);
+
+            int testDateArraySize = testSize * dateWidth;
+
+            char[] testDateArray = new char[testDateArraySize];
+            string[] testDateArrayString = dateList.Skip(resultSize).Take(testSize).ToArray();
+            Console.WriteLine(testDateArrayString.Length);
+
+            for (int i = 0; i < testDateArraySize; i += dateWidth)
+            {
+                char[] date = testDateArrayString[i / dateWidth].ToCharArray();
+                for (int j = 0; j < dateWidth; j++)
+                {
+                    testDateArray[i + j] = date[j];
+                }
+            }
+
+            InitTestDateArray(multiCharts, testSize);
+            SetTestDateArray(multiCharts, testDateArray);
+
+            try
+            {
+                Console.WriteLine(TestModel(multiCharts));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("{0} Exception found", e);
+            }
+
+
             DisposeMultiCharts(multiCharts);
             multiCharts = IntPtr.Zero;
             pt.Stop();
+
             Console.WriteLine("Duration : " +  pt.Duration.ToString() + 's');
         }
     }
