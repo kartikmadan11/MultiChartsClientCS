@@ -73,16 +73,12 @@ namespace MultiChartsClientCS
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?TestModel@MultiCharts@@QEAANXZ")]
         public static extern double TestModel(IntPtr multiCharts);
 
-        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            // Log the exception, display it, etc
-            Debug.WriteLine((e.ExceptionObject as Exception).Message);
-        }
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?Predict@MultiCharts@@QEAAPEANH")]
+        public static extern IntPtr Predict(IntPtr multiCharts, int ticks);
 
         static void Main(string[] args)
         {
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-
+            
             HiPerfTimer pt = new HiPerfTimer();
             pt.Start();
             IntPtr multiCharts = CreateMultiCharts();
@@ -102,7 +98,7 @@ namespace MultiChartsClientCS
             dateList.RemoveAt(0);
             dataList.RemoveAt(0);
 
-            int resultSize = 200; // must be greater than rnn window(60)
+            int resultSize = 800; // must be greater than rnn window(60)
             double[] input = Array.ConvertAll(dataList.Take(resultSize).ToArray(), new Converter<string, double>(Double.Parse));
 
             InitTrainingData(multiCharts, resultSize);
@@ -140,8 +136,10 @@ namespace MultiChartsClientCS
             SetMomentum(multiCharts, 10);
 
             Console.WriteLine(TrainModel(multiCharts));
-
-            int testSize = 50; // must be greater than rnn window(60)
+            
+            SetTestingWeight(multiCharts, 0.3);
+            
+            int testSize = 100; // must be greater than rnn window(60)
             double[] testSet = Array.ConvertAll(dataList.Skip(resultSize).Take(testSize).ToArray(), new Converter<string, double>(double.Parse));
             Console.WriteLine(testSet.Length);
 
@@ -163,6 +161,9 @@ namespace MultiChartsClientCS
                 }
             }
 
+            Console.WriteLine(testDateArray);
+            Console.WriteLine(testDateArray.Length);
+
             InitTestDateArray(multiCharts, testSize);
             SetTestDateArray(multiCharts, testDateArray);
 
@@ -175,7 +176,15 @@ namespace MultiChartsClientCS
                 Console.WriteLine("{0} Exception found", e);
             }
 
+            /*int ticks = 5;
+            double[] predictions = new double[ticks];
+            Marshal.Copy(Predict(multiCharts, ticks), predictions, 0, ticks);
 
+            for(int i = 0; i < ticks; i++)
+            {
+                Console.WriteLine(predictions[i]);
+            }
+            */
             DisposeMultiCharts(multiCharts);
             multiCharts = IntPtr.Zero;
             pt.Stop();
