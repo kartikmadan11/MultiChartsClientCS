@@ -73,7 +73,7 @@ namespace MultiChartsClientCS
         [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?TestModel@MultiCharts@@QEAANXZ")]
         public static extern double TestModel(IntPtr multiCharts);
 
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?Predict@MultiCharts@@QEAAPEANH")]
+        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?Predict@MultiCharts@@QEAAPEANH@Z")]
         public static extern IntPtr Predict(IntPtr multiCharts, int ticks);
 
         static void Main(string[] args)
@@ -98,7 +98,7 @@ namespace MultiChartsClientCS
             dateList.RemoveAt(0);
             dataList.RemoveAt(0);
 
-            int resultSize = 800; // must be greater than rnn window(60)
+            int resultSize = 2000; // must be greater than rnn window(60)
             double[] input = Array.ConvertAll(dataList.Take(resultSize).ToArray(), new Converter<string, double>(Double.Parse));
 
             InitTrainingData(multiCharts, resultSize);
@@ -109,7 +109,6 @@ namespace MultiChartsClientCS
 
             char[] dateArray = new char[dateArraySize];
             string[] dateArrayString = dateList.Take(resultSize).ToArray();
-            Console.WriteLine(dateArrayString[1]);
 
             for (int i = 0; i < dateArraySize; i += dateWidth)
             {
@@ -125,24 +124,23 @@ namespace MultiChartsClientCS
             
             char[] fileName = "modelLSTM".ToCharArray();
             InitFileName(multiCharts, fileName.Length);
-            Console.WriteLine(fileName.Length);
             Console.WriteLine(fileName);
             SetFileName(multiCharts, fileName);
 
-            SetEpochs(multiCharts, 2);
+            SetEpochs(multiCharts, 20);
             SetLearningRate(multiCharts, 0.001);
             SetScale(multiCharts, 100);
             SetOptimizer(multiCharts, 0);
             SetMomentum(multiCharts, 10);
 
+            Console.WriteLine("TRAIN");
             Console.WriteLine(TrainModel(multiCharts));
             
             SetTestingWeight(multiCharts, 0.3);
             
             int testSize = 100; // must be greater than rnn window(60)
             double[] testSet = Array.ConvertAll(dataList.Skip(resultSize).Take(testSize).ToArray(), new Converter<string, double>(double.Parse));
-            Console.WriteLine(testSet.Length);
-
+            
             InitTestingData(multiCharts, testSize);
             SetTestingData(multiCharts, testSet);
 
@@ -150,8 +148,7 @@ namespace MultiChartsClientCS
 
             char[] testDateArray = new char[testDateArraySize];
             string[] testDateArrayString = dateList.Skip(resultSize).Take(testSize).ToArray();
-            Console.WriteLine(testDateArrayString.Length);
-
+            
             for (int i = 0; i < testDateArraySize; i += dateWidth)
             {
                 char[] date = testDateArrayString[i / dateWidth].ToCharArray();
@@ -160,31 +157,28 @@ namespace MultiChartsClientCS
                     testDateArray[i + j] = date[j];
                 }
             }
-
-            Console.WriteLine(testDateArray);
-            Console.WriteLine(testDateArray.Length);
-
+            
             InitTestDateArray(multiCharts, testSize);
             SetTestDateArray(multiCharts, testDateArray);
 
-            try
-            {
-                Console.WriteLine(TestModel(multiCharts));
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("{0} Exception found", e);
-            }
-
-            /*int ticks = 5;
+            Console.WriteLine("TEST");
+            Console.WriteLine(TestModel(multiCharts));
+            
+            int ticks = 5;
             double[] predictions = new double[ticks];
-            Marshal.Copy(Predict(multiCharts, ticks), predictions, 0, ticks);
+
+            Console.WriteLine("PREDICT");
+            IntPtr forecastPointer = Predict(multiCharts, ticks);
+            if (Predict(multiCharts, ticks) != null)
+            {
+                Marshal.Copy(forecastPointer, predictions, 0, ticks);
+            }
 
             for(int i = 0; i < ticks; i++)
             {
                 Console.WriteLine(predictions[i]);
             }
-            */
+
             DisposeMultiCharts(multiCharts);
             multiCharts = IntPtr.Zero;
             pt.Stop();
