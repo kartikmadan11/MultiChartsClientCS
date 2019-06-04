@@ -1,88 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
 using Win32;
+using MultiChartsCppWrapper;
+using System.Runtime.InteropServices;
 
 namespace MultiChartsClientCS
 {
     class Program
     {
-        private const string dllAddress = "C:\\Users\\magic\\source\\repos\\MultiChartsDLL\\x64\\Release\\MultiChartsDLL.dll";
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "??0MultiCharts@@QEAA@XZ")]
-        public static extern IntPtr CreateMultiCharts();
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "??1MultiCharts@@QEAA@XZ")]
-        public static extern void DisposeMultiCharts(IntPtr multiCharts);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitTrainingData@MultiCharts@@QEAAXH@Z")]
-        public static extern void InitTrainingData(IntPtr multiCharts, int size);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetTrainingData@MultiCharts@@QEAAXPEAN@Z")]
-        public static extern void SetTrainingData(IntPtr multiCharts, double[] trainingData);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitTestingData@MultiCharts@@QEAAXH@Z")]
-        public static extern void InitTestingData(IntPtr multiCharts, int size);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetTestingData@MultiCharts@@QEAAXPEAN@Z")]
-        public static extern void SetTestingData(IntPtr multiCharts, double[] testingData);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitDateArray@MultiCharts@@QEAAXH@Z")]
-        public static extern double InitDateArray(IntPtr multiCharts, int size);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetDateArray@MultiCharts@@QEAAXPEAD@Z")]
-        public static extern void SetDateArray(IntPtr multiCharts, char[] dateArray);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitTestDateArray@MultiCharts@@QEAAXH@Z")]
-        public static extern double InitTestDateArray(IntPtr multiCharts, int size);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetTestDateArray@MultiCharts@@QEAAXPEAD@Z")]
-        public static extern void SetTestDateArray(IntPtr multiCharts, char[] testDateArray);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?InitFileName@MultiCharts@@QEAAXH@Z")]
-        public static extern double InitFileName(IntPtr multiCharts, int size);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetFileName@MultiCharts@@QEAAXPEAD@Z")]
-        public static extern void SetFileName(IntPtr multiCharts, char[] fileName);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetEpochs@MultiCharts@@QEAAXH@Z")]
-        public static extern void SetEpochs(IntPtr multiCharts, int epochs);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetScale@MultiCharts@@QEAAXH@Z")]
-        public static extern void SetScale(IntPtr multiCharts, int scale);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetLearningRate@MultiCharts@@QEAAXN@Z")]
-        public static extern void SetLearningRate(IntPtr multiCharts, double learningRate);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetOptimizer@MultiCharts@@QEAAXH@Z")]
-        public static extern void SetOptimizer(IntPtr multiCharts, int optimizer);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetMomentum@MultiCharts@@QEAAXH@Z")]
-        public static extern void SetMomentum(IntPtr multiCharts, int momentum);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?SetTestingWeight@MultiCharts@@QEAAXN@Z")]
-        public static extern void SetTestingWeight(IntPtr multiCharts, double testingWeight);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?TrainModel@MultiCharts@@QEAANXZ")]
-        public static extern double TrainModel(IntPtr multiCharts);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?TestModel@MultiCharts@@QEAANXZ")]
-        public static extern double TestModel(IntPtr multiCharts);
-
-        [DllImport(dllAddress, CallingConvention = CallingConvention.Cdecl, EntryPoint = "?Predict@MultiCharts@@QEAAPEANH@Z")]
-        public static extern IntPtr Predict(IntPtr multiCharts, int ticks);
-
+        public static void StringArrayToPtr(IntPtr ptr, string[] array)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                byte[] chars = System.Text.Encoding.ASCII.GetBytes(array[i] + '\0');
+                Marshal.Copy(chars, 0, Marshal.ReadIntPtr(ptr, i * IntPtr.Size), chars.Length);
+            }
+        }
         static void Main(string[] args)
         {
    
             HiPerfTimer pt = new HiPerfTimer();
             pt.Start();
-            IntPtr multiCharts = CreateMultiCharts();
-
+            MultiChartsWrapper multiCharts = new MultiChartsWrapper();
 
             var dateList = new List<string>();
             var dataList = new List<string>();
@@ -102,8 +43,9 @@ namespace MultiChartsClientCS
             int resultSize = 2000; // must be greater than rnn window(60)
             double[] input = Array.ConvertAll(dataList.Take(resultSize).ToArray(), new Converter<string, double>(Double.Parse));
 
-            InitTrainingData(multiCharts, resultSize);
-            SetTrainingData(multiCharts, input);
+            Console.WriteLine(input.Length);
+            //InitTrainingData(multiCharts, resultSize);
+            multiCharts.SetTrainingData(input);
 
             const int dateWidth = 10;
             int dateArraySize = resultSize* dateWidth;
@@ -120,23 +62,27 @@ namespace MultiChartsClientCS
                 }
             }
 
-            InitDateArray(multiCharts, resultSize);
-            SetDateArray(multiCharts, dateArray);
+            //InitDateArray(multiCharts, resultSize);
+
+            Console.WriteLine(dateArrayString);
+            IntPtr ptr = IntPtr.Zero;
+            StringArrayToPtr(ptr, dateArrayString);
+            multiCharts.SetDateArray(ptr);
             
             char[] fileName = "modelLSTM".ToCharArray();
-            InitFileName(multiCharts, fileName.Length);
+            //InitFileName(multiCharts, fileName.Length);
             Console.WriteLine(fileName);
-            SetFileName(multiCharts, fileName);
+            multiCharts.SetFileName(fileName);
 
-            SetEpochs(multiCharts, 2);
-            SetLearningRate(multiCharts, 0.001);
-            SetScale(multiCharts, 100);
-            SetOptimizer(multiCharts, 0);
-            SetMomentum(multiCharts, 10);
+            multiCharts.SetEpochs(2);
+            multiCharts.SetLearningRate(0.001);
+            multiCharts.SetScale(100);
+            multiCharts.SetOptimizer( 0);
+            multiCharts.SetMomentum(10);
 
             Console.WriteLine("TRAIN");
-            Console.WriteLine(TrainModel(multiCharts));
-            
+            Console.WriteLine(multiCharts.TrainModel());
+            /*
             SetTestingWeight(multiCharts, 0.3);
             
             int testSize = 100; // must be greater than rnn window(60)
@@ -183,7 +129,7 @@ namespace MultiChartsClientCS
             DisposeMultiCharts(multiCharts);
             multiCharts = IntPtr.Zero;
             pt.Stop();
-
+            */
             Console.WriteLine("Duration : " +  pt.Duration.ToString() + 's');
         }
     }
