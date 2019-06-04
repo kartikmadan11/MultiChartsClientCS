@@ -70,6 +70,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MultiChartsCLR">
+      <HintPath>..\..\MultiChartsCLR\x64\Release\MultiChartsCLR.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />

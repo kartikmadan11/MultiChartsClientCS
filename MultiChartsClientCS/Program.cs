@@ -78,10 +78,11 @@ namespace MultiChartsClientCS
 
         static void Main(string[] args)
         {
-            
+   
             HiPerfTimer pt = new HiPerfTimer();
             pt.Start();
             IntPtr multiCharts = CreateMultiCharts();
+
 
             var dateList = new List<string>();
             var dataList = new List<string>();
@@ -127,7 +128,7 @@ namespace MultiChartsClientCS
             Console.WriteLine(fileName);
             SetFileName(multiCharts, fileName);
 
-            SetEpochs(multiCharts, 20);
+            SetEpochs(multiCharts, 2);
             SetLearningRate(multiCharts, 0.001);
             SetScale(multiCharts, 100);
             SetOptimizer(multiCharts, 0);
