@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Win32;
 using MultiChartsCppWrapper;
-using Microsoft.ML
 
 namespace MultiChartsClientCS
 {
@@ -33,8 +31,8 @@ namespace MultiChartsClientCS
             dateList.RemoveAt(0);
             dataList.RemoveAt(0);
 
-            int resultSize = 2000; // must be greater than rnn window(60)
-            double[] input = Array.ConvertAll(dataList.Take(resultSize).ToArray(), new Converter<string, double>(double.Parse));
+            int resultSize = 65; // must be greater than rnn window(60)
+            Double[] input = Array.ConvertAll(dataList.Take(resultSize).ToArray(), new Converter<string, Double>(Double.Parse));
 
             multiCharts.SetTrainingData(input);
             
@@ -60,7 +58,9 @@ namespace MultiChartsClientCS
             }
 
             Console.WriteLine(unixDateArray.Length);
-            Console.WriteLine(unixDateArray[1488]);
+            Console.WriteLine(unixDateArray[14]);
+            Console.WriteLine(input[14]);
+            Console.WriteLine(input.Length);
             Console.WriteLine(dateArrayString[0].Length);
             multiCharts.SetDateArrayUNIX(unixDateArray);
 
@@ -75,7 +75,8 @@ namespace MultiChartsClientCS
             multiCharts.SetMomentum(10); 
 
             Console.WriteLine("TRAIN");
-            Console.WriteLine(multiCharts.TrainModel());
+            double res = multiCharts.TrainModel();
+            Console.WriteLine(res);
             /*
             SetTestingWeight(multiCharts, 0.3);
             
