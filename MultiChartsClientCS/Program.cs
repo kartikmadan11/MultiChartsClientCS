@@ -31,7 +31,12 @@ namespace MultiChartsClientCS
             dateList.RemoveAt(0);
             dataList.RemoveAt(0);
 
-            int resultSize = 65; // must be greater than rnn window(60)
+            TextWriter tw = new StreamWriter("export.txt");
+            foreach (String s in dataList)
+                tw.WriteLine(s);
+            tw.Close();
+
+            int resultSize = 1000; // must be greater than rnn window(60)
             double[] input = Array.ConvertAll(dataList.Take(resultSize).ToArray(), new Converter<string, double>(Double.Parse));
 
             multiCharts.SetTrainingData(input, input.Length);
@@ -40,15 +45,6 @@ namespace MultiChartsClientCS
 
             char[] dateArray = new char[dateArraySize];
             string[] dateArrayString = dateList.Take(resultSize).ToArray();
-
-            /*for (int i = 0; i < dateArraySize; i += dateWidth)
-            {
-                char[] date = dateArrayString[i/dateWidth].ToCharArray();
-                for (int j = 0; j < dateWidth; j++)
-                {
-                    dateArray[i + j] = date[j];
-                }
-            }*/
 
             long[] unixDateArray = new long[dateArrayString.Length];
             for(int i = 0; i < dateArrayString.Length; i++)
@@ -64,7 +60,7 @@ namespace MultiChartsClientCS
             multiCharts.SetDateArrayUNIX(unixDateArray);
 
             String fileName = "modelLSTM";
-            Console.WriteLine(fileName);
+            Console.WriteLine(fileName);        
             multiCharts.SetFileName(fileName);
 
             multiCharts.SetEpochs(2);
