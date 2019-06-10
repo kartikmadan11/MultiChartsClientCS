@@ -32,10 +32,9 @@ namespace MultiChartsClientCS
             dataList.RemoveAt(0);
 
             int resultSize = 65; // must be greater than rnn window(60)
-            Double[] input = Array.ConvertAll(dataList.Take(resultSize).ToArray(), new Converter<string, Double>(Double.Parse));
+            double[] input = Array.ConvertAll(dataList.Take(resultSize).ToArray(), new Converter<string, double>(Double.Parse));
 
-            multiCharts.SetTrainingData(input);
-            
+            multiCharts.SetTrainingData(input, input.Length);
             const int dateWidth = 10;
             int dateArraySize = resultSize* dateWidth;
 
@@ -51,15 +50,15 @@ namespace MultiChartsClientCS
                 }
             }*/
 
-            Int64[] unixDateArray = new Int64[dateArrayString.Length];
+            long[] unixDateArray = new long[dateArrayString.Length];
             for(int i = 0; i < dateArrayString.Length; i++)
             {
-                unixDateArray[i] = (Int64)(DateTime.Parse(dateArrayString[i]).Subtract(new DateTime(1970,1,1))).TotalSeconds;
+                unixDateArray[i] = (Int64)(DateTime.Parse(dateArrayString[i]).Subtract(new DateTime(1970,1,1,5,30,0))).TotalSeconds;
             }
 
             Console.WriteLine(unixDateArray.Length);
-            Console.WriteLine(unixDateArray[14]);
-            Console.WriteLine(input[14]);
+            Console.WriteLine(unixDateArray[0]);
+            Console.WriteLine(input[1]);
             Console.WriteLine(input.Length);
             Console.WriteLine(dateArrayString[0].Length);
             multiCharts.SetDateArrayUNIX(unixDateArray);
@@ -68,15 +67,16 @@ namespace MultiChartsClientCS
             Console.WriteLine(fileName);
             multiCharts.SetFileName(fileName);
 
-            multiCharts.SetEpochs(2); 
-            multiCharts.SetLearningRate(0.001); 
-            multiCharts.SetScale(100); 
+            multiCharts.SetEpochs(2);
+            multiCharts.SetLearningRate(0.001);
+            multiCharts.SetScale(100);
             multiCharts.SetOptimizer(0);
-            multiCharts.SetMomentum(10); 
+            multiCharts.SetMomentum(10);
 
             Console.WriteLine("TRAIN");
             double res = multiCharts.TrainModel();
             Console.WriteLine(res);
+
             /*
             SetTestingWeight(multiCharts, 0.3);
             
