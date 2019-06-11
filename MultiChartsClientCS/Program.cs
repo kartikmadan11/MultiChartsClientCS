@@ -39,11 +39,10 @@ namespace MultiChartsClientCS
             int resultSize = 1000; // must be greater than rnn window(60)
             double[] input = Array.ConvertAll(dataList.Take(resultSize).ToArray(), new Converter<string, double>(Double.Parse));
 
-            multiCharts.SetTrainingData(input, input.Length);
+            multiCharts.SetTrainingData(input);
             const int dateWidth = 10;
             int dateArraySize = resultSize* dateWidth;
 
-            char[] dateArray = new char[dateArraySize];
             string[] dateArrayString = dateList.Take(resultSize).ToArray();
 
             long[] unixDateArray = new long[dateArrayString.Length];
@@ -73,53 +72,44 @@ namespace MultiChartsClientCS
             double res = multiCharts.TrainModel();
             Console.WriteLine(res);
 
-            /*
-            SetTestingWeight(multiCharts, 0.3);
+            multiCharts.SetTestingWeight(0.3);
             
             int testSize = 100; // must be greater than rnn window(60)
             double[] testSet = Array.ConvertAll(dataList.Skip(resultSize).Take(testSize).ToArray(), new Converter<string, double>(double.Parse));
-            
-            InitTestingData(multiCharts, testSize);
-            SetTestingData(multiCharts, testSet);
+
+            Console.WriteLine(testSet[99]);
+
+            multiCharts.SetTestingData(testSet);
 
             int testDateArraySize = testSize * dateWidth;
 
-            char[] testDateArray = new char[testDateArraySize];
             string[] testDateArrayString = dateList.Skip(resultSize).Take(testSize).ToArray();
-            
-            for (int i = 0; i < testDateArraySize; i += dateWidth)
+
+            long[] unixTestDateArray = new long[dateArrayString.Length];
+            for (int i = 0; i < dateArrayString.Length; i++)
             {
-                char[] date = testDateArrayString[i / dateWidth].ToCharArray();
-                for (int j = 0; j < dateWidth; j++)
-                {
-                    testDateArray[i + j] = date[j];
-                }
+                unixTestDateArray[i] = (Int64)(DateTime.Parse(testDateArrayString[i]).Subtract(new DateTime(1970, 1, 1, 5, 30, 0))).TotalSeconds;
             }
-            
-            InitTestDateArray(multiCharts, testSize);
-            SetTestDateArray(multiCharts, testDateArray);
+
+            multiCharts.SetTestDateArrayUNIX(unixTestDateArray);
 
             Console.WriteLine("TEST");
-            Console.WriteLine(TestModel(multiCharts));
+            Console.WriteLine(multiCharts.TestModel());
             
             int ticks = 5;
             double[] predictions = new double[ticks];
 
             Console.WriteLine("PREDICT");
-            IntPtr forecastPointer = Predict(multiCharts, ticks);
-            if (Predict(multiCharts, ticks) != null)
+            double[] forecast = multiCharts.Predict(ticks);
+            if (forecast != null)
             {
-                Marshal.Copy(forecastPointer, predictions, 0, ticks);
+                for (int i = 0; i < ticks; i++)
+                {
+                    Console.WriteLine(forecast[i]);
+                }
             }
 
-            for(int i = 0; i < ticks; i++)
-            {
-                Console.WriteLine(predictions[i]);
-            }
-            */
-            //multiCharts = IntPtr.Zero;
             pt.Stop();
-
             Console.WriteLine("Duration : " +  pt.Duration.ToString() + 's');
         }
     }
