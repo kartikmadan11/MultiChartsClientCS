@@ -36,7 +36,7 @@ namespace MultiChartsClientCS
                 tw.WriteLine(s);
             tw.Close();
 
-            int resultSize = 1000; // must be greater than rnn window(60)
+            int resultSize = 2900; // must be greater than rnn window(60)
             double[] input = Array.ConvertAll(dataList.Take(resultSize).ToArray(), new Converter<string, double>(Double.Parse));
 
             multiCharts.SetTrainingData(input);
@@ -62,7 +62,7 @@ namespace MultiChartsClientCS
             Console.WriteLine(fileName);        
             multiCharts.SetFileName(fileName);
 
-            multiCharts.SetEpochs(2);
+            multiCharts.SetEpochs(30);
             multiCharts.SetLearningRate(0.001);
             multiCharts.SetScale(100);
             multiCharts.SetOptimizer(0);
@@ -77,16 +77,14 @@ namespace MultiChartsClientCS
             int testSize = 100; // must be greater than rnn window(60)
             double[] testSet = Array.ConvertAll(dataList.Skip(resultSize).Take(testSize).ToArray(), new Converter<string, double>(double.Parse));
 
-            Console.WriteLine(testSet[99]);
-
             multiCharts.SetTestingData(testSet);
 
             int testDateArraySize = testSize * dateWidth;
 
             string[] testDateArrayString = dateList.Skip(resultSize).Take(testSize).ToArray();
 
-            long[] unixTestDateArray = new long[dateArrayString.Length];
-            for (int i = 0; i < dateArrayString.Length; i++)
+            long[] unixTestDateArray = new long[testDateArrayString.Length];
+            for (int i = 0; i < testDateArrayString.Length; i++)
             {
                 unixTestDateArray[i] = (Int64)(DateTime.Parse(testDateArrayString[i]).Subtract(new DateTime(1970, 1, 1, 5, 30, 0))).TotalSeconds;
             }
