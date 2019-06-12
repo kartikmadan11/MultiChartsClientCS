@@ -62,12 +62,13 @@ namespace MultiChartsClientCS
             Console.WriteLine(fileName);        
             multiCharts.SetFileName(fileName);
 
-            multiCharts.SetEpochs(30);
+            multiCharts.SetEpochs(1);
             multiCharts.SetLearningRate(0.001);
             multiCharts.SetScale(100);
             multiCharts.SetOptimizer(0);
             multiCharts.SetMomentum(10);
 
+            Console.WriteLine((Int64)(DateTime.Parse(String.Join(" ", "2019.01.24", TimeSpan.FromDays(0.1409722222).ToString())).Subtract(new DateTime(1970, 1, 1, 5, 30, 0)).TotalSeconds));
             Console.WriteLine("TRAIN");
             double res = multiCharts.TrainModel();
             Console.WriteLine(res);
@@ -87,8 +88,8 @@ namespace MultiChartsClientCS
             for (int i = 0; i < testDateArrayString.Length; i++)
             {
                 unixTestDateArray[i] = (Int64)(DateTime.Parse(testDateArrayString[i]).Subtract(new DateTime(1970, 1, 1, 5, 30, 0))).TotalSeconds;
+            
             }
-
             multiCharts.SetTestDateArrayUNIX(unixTestDateArray);
 
             Console.WriteLine("TEST");
