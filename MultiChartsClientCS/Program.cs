@@ -11,7 +11,7 @@ namespace MultiChartsClientCS
     {
         static void Main(string[] args)
         {
-            
+
             HiPerfTimer pt = new HiPerfTimer();
             pt.Start();
             MultiChartsWrapper multiCharts = new MultiChartsWrapper();
@@ -41,14 +41,14 @@ namespace MultiChartsClientCS
 
             multiCharts.SetTrainingData(input);
             const int dateWidth = 10;
-            int dateArraySize = resultSize* dateWidth;
+            int dateArraySize = resultSize * dateWidth;
 
             string[] dateArrayString = dateList.Take(resultSize).ToArray();
 
             long[] unixDateArray = new long[dateArrayString.Length];
-            for(int i = 0; i < dateArrayString.Length; i++)
+            for (int i = 0; i < dateArrayString.Length; i++)
             {
-                unixDateArray[i] = (Int64)(DateTime.Parse(dateArrayString[i]).Subtract(new DateTime(1970,1,1,5,30,0))).TotalSeconds;
+                unixDateArray[i] = (Int64)(DateTime.Parse(dateArrayString[i]).Subtract(new DateTime(1970, 1, 1, 5, 30, 0))).TotalSeconds;
             }
 
             Console.WriteLine(unixDateArray.Length);
@@ -59,22 +59,21 @@ namespace MultiChartsClientCS
             multiCharts.SetDateArrayUNIX(unixDateArray);
 
             String fileName = "modelLSTM";
-            Console.WriteLine(fileName);        
+            Console.WriteLine(fileName);
             multiCharts.SetFileName(fileName);
 
-            multiCharts.SetEpochs(1);
+            multiCharts.SetEpochs(30);
             multiCharts.SetLearningRate(0.001);
             multiCharts.SetScale(100);
             multiCharts.SetOptimizer(0);
             multiCharts.SetMomentum(10);
 
-            Console.WriteLine((Int64)(DateTime.Parse(String.Join(" ", "2019.01.24", TimeSpan.FromDays(0.1409722222).ToString())).Subtract(new DateTime(1970, 1, 1, 5, 30, 0)).TotalSeconds));
             Console.WriteLine("TRAIN");
             double res = multiCharts.TrainModel();
             Console.WriteLine(res);
 
             multiCharts.SetTestingWeight(0.3);
-            
+
             int testSize = 100; // must be greater than rnn window(60)
             double[] testSet = Array.ConvertAll(dataList.Skip(resultSize).Take(testSize).ToArray(), new Converter<string, double>(double.Parse));
 
@@ -88,13 +87,13 @@ namespace MultiChartsClientCS
             for (int i = 0; i < testDateArrayString.Length; i++)
             {
                 unixTestDateArray[i] = (Int64)(DateTime.Parse(testDateArrayString[i]).Subtract(new DateTime(1970, 1, 1, 5, 30, 0))).TotalSeconds;
-            
             }
+
             multiCharts.SetTestDateArrayUNIX(unixTestDateArray);
 
             Console.WriteLine("TEST");
             Console.WriteLine(multiCharts.TestModel());
-            
+
             int ticks = 5;
             double[] predictions = new double[ticks];
 
@@ -109,7 +108,7 @@ namespace MultiChartsClientCS
             }
 
             pt.Stop();
-            Console.WriteLine("Duration : " +  pt.Duration.ToString() + 's');
+            Console.WriteLine("Duration : " + pt.Duration.ToString() + 's');
         }
     }
 }
