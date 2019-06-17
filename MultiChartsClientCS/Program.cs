@@ -31,11 +31,6 @@ namespace MultiChartsClientCS
             dateList.RemoveAt(0);
             dataList.RemoveAt(0);
 
-            TextWriter tw = new StreamWriter("export.txt");
-            foreach (String s in dataList)
-                tw.WriteLine(s);
-            tw.Close();
-
             int resultSize = 2900; // must be greater than rnn window(60)
             double[] input = Array.ConvertAll(dataList.Take(resultSize).ToArray(), new Converter<string, double>(Double.Parse));
 
