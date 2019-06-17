@@ -13,6 +13,12 @@ namespace MultiChartsClientCS
             pt.Start();
             MultiChartsWrapper multiCharts = new MultiChartsWrapper();
 
+            if (args.Length == 0)
+            {
+                Console.WriteLine("No command line arguments provided");
+                Environment.Exit(0);
+            }
+
             Console.WriteLine("Length of args: " + args[0].Length);
             string[] splitArgs = args[0].Split(';');
             Console.WriteLine("Command Line Args: " + splitArgs.Length);
