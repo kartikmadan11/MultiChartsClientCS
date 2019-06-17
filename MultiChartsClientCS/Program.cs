@@ -11,7 +11,7 @@ namespace MultiChartsClientCS
     {
         static void Main(string[] args)
         {
-
+            
             HiPerfTimer pt = new HiPerfTimer();
             pt.Start();
             MultiChartsWrapper multiCharts = new MultiChartsWrapper();
