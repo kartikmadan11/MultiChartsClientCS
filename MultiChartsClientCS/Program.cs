@@ -9,14 +9,16 @@ namespace MultiChartsClientCS
     {
         static void Main(string[] args)
         {
-            
-            MultiChartsWrapper multiCharts = new MultiChartsWrapper();
+            HiPerfTimer pt = new HiPerfTimer();
+            pt.Start();
 
             if (args.Length == 0)
             {
                 Console.WriteLine("No command line arguments provided");
                 Environment.Exit(0);
             }
+
+            MultiChartsWrapper multiCharts = new MultiChartsWrapper();
 
             Console.WriteLine(args[0]);
             Console.WriteLine("Length of args: " + args[0].Length);
@@ -25,8 +27,6 @@ namespace MultiChartsClientCS
 
             if (splitArgs[0] == "train")
             {
-                HiPerfTimer pt = new HiPerfTimer();
-                pt.Start();
 
                 string[] t_data_str = splitArgs[1].Split(',');
                 double[] t_data = new double[t_data_str.Length];
@@ -75,47 +75,43 @@ namespace MultiChartsClientCS
 
                 Console.WriteLine("Testing the trained model on " + testingSize + " elements");
                 Console.WriteLine(multiCharts.TestModel());
-
-                pt.Stop();
-                Console.WriteLine("Duration : " + pt.Duration.ToString() + 's');
-                Console.Write("Press any key to exit: ");
-                Console.ReadKey();
             }
 
             else if(splitArgs[0] == "eval")
             {
-                HiPerfTimer pt = new HiPerfTimer();
-                pt.Start();
-
-                pt.Stop();
-                Console.WriteLine("Duration : " + pt.Duration.ToString() + 's');
             }
 
             else if(splitArgs[0] == "forecast")
-            {                
+            {
                 int ticks = int.Parse(splitArgs[1]);
                 long lastDateTime = long.Parse(splitArgs[2]);
                 long dateTimeDiff = long.Parse(splitArgs[3]);
                 string fileName = splitArgs[4];
 
-                double[] pred = new double[ticks];
                 multiCharts.SetFileName(fileName);
-                pred = multiCharts.Predict(ticks);
+                double[] pred = multiCharts.Predict(ticks);
 
                 if (pred.Length == 0)
                     Console.WriteLine("Predictions not made");
                 
                 else
                 {
-                    for(int i = 0; i < pred.Length; i++)
+                    if(pred != null)
                     {
-                        Console.Write(new DateTime(1970, 1, 1, 5, 30, 0).AddSeconds(lastDateTime + (i+1)*dateTimeDiff));
-                        Console.WriteLine(" : " + pred[i]);
+                        for(int i = 0; i < pred.Length; i++)
+                        {
+                            Console.Write(new DateTime(1970, 1, 1, 5, 30, 0).AddSeconds(lastDateTime + (i+1)*dateTimeDiff));
+                            Console.WriteLine(" : " + pred[i]);
+                        }
                     }
                 }
 
             }
 
+            pt.Stop();
+            Console.WriteLine("Duration : " + pt.Duration.ToString() + 's');
+            Console.Write("Press any key to exit: ");
+            Console.ReadKey();
         }
     }
 }
