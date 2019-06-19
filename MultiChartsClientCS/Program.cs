@@ -92,12 +92,15 @@ namespace MultiChartsClientCS
             }
 
             else if(splitArgs[0] == "forecast")
-            {
+            {                
                 int ticks = int.Parse(splitArgs[1]);
                 long lastDateTime = long.Parse(splitArgs[2]);
                 long dateTimeDiff = long.Parse(splitArgs[3]);
+                string fileName = splitArgs[4];
 
-                double[] pred = multiCharts.Predict(ticks);
+                double[] pred = new double[ticks];
+                multiCharts.SetFileName(fileName);
+                pred = multiCharts.Predict(ticks);
 
                 if (pred.Length == 0)
                     Console.WriteLine("Predictions not made");
