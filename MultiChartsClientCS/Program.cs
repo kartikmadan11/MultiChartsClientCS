@@ -88,7 +88,6 @@ namespace MultiChartsClientCS
             Console.WriteLine(multiCharts.TestModel());
 
             int ticks = 5;
-            double[] predictions = new double[ticks];
 
             Console.WriteLine("PREDICT");
             double[] forecast = multiCharts.Predict(ticks);
