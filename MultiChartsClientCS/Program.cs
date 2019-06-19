@@ -11,7 +11,6 @@ namespace MultiChartsClientCS
     {
         static void Main(string[] args)
         {
-            
             HiPerfTimer pt = new HiPerfTimer();
             pt.Start();
             MultiChartsWrapper multiCharts = new MultiChartsWrapper();
@@ -86,7 +85,7 @@ namespace MultiChartsClientCS
 
             Console.WriteLine("TEST");
             Console.WriteLine(multiCharts.TestModel());
-
+            
             int ticks = 5;
 
             Console.WriteLine("PREDICT");
