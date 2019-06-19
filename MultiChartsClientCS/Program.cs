@@ -65,9 +65,7 @@ namespace MultiChartsClientCS
 
             Console.WriteLine("TRAIN");
             double res = multiCharts.TrainModel();
-            Console.WriteLine(res);
-
-            multiCharts.SetTestingWeight(0.3);
+            Console.WriteLine(res);            
 
             int testSize = 100; // must be greater than rnn window(60)
             double[] testSet = Array.ConvertAll(dataList.Skip(resultSize).Take(testSize).ToArray(), new Converter<string, double>(double.Parse));
