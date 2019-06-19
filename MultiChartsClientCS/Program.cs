@@ -20,7 +20,6 @@ namespace MultiChartsClientCS
 
             MultiChartsWrapper multiCharts = new MultiChartsWrapper();
 
-            Console.WriteLine(args[0]);
             Console.WriteLine("Length of args: " + args[0].Length);
             string[] splitArgs = args[0].Split(';');
             Console.WriteLine("Command Line Args: " + splitArgs.Length);
