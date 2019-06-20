@@ -78,6 +78,7 @@ namespace MultiChartsClientCS
 
             else if(splitArgs[0] == "eval")
             {
+                
             }
 
             else if(splitArgs[0] == "forecast")
