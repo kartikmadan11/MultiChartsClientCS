@@ -78,7 +78,29 @@ namespace MultiChartsClientCS
 
             else if(splitArgs[0] == "eval")
             {
-                
+
+                int metrics = 3;
+                double testingWeight = double.Parse(splitArgs[1]);
+                string fileName = splitArgs[2];
+
+                multiCharts.SetTestingWeight(testingWeight);
+                multiCharts.SetFileName(fileName);
+
+                double[] eval = multiCharts.Evaluate(metrics);
+
+                if (eval.Length == 0)
+                    Console.WriteLine("Predictions not made");
+
+                else
+                {
+                    if (eval != null)
+                    {
+                        Console.WriteLine("Computing scores for testing weight : " + testingWeight);
+                        Console.WriteLine("Loss : " + eval[0]);
+                        Console.WriteLine("Mean Square Error: " + eval[1]);
+                        Console.WriteLine("R2 Score : " + eval[2]);
+                    }
+                }
             }
 
             else if(splitArgs[0] == "forecast")
