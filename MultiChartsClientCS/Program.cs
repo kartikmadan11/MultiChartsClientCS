@@ -17,7 +17,7 @@ namespace MultiChartsClientCS
 
             List<string> dateList = new List<string>();
             List<string> dataList = new List<string>();
-            using (var rd = new StreamReader("C:\\Users\\magic\\Jupyter Notebooks\\MultiCharts\\input\\abc_k.csv"))
+            using (var rd = new StreamReader("C:\\Users\\kartik\\Jupyter Notebooks\\MultiCharts\\input\\abc_k.csv"))
             {
                 while (!rd.EndOfStream)
                 {

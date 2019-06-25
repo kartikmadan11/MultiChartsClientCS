@@ -74,7 +74,8 @@
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MultiChartsCLR">
+    <Reference Include="MultiChartsCLR, Version=1.0.7115.25298, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\MultiChartsCLR\x64\Release\MultiChartsCLR.dll</HintPath>
     </Reference>
     <Reference Include="System" />
