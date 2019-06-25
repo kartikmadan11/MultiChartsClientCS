@@ -129,6 +129,11 @@ namespace MultiChartsClientCS
                 }
 
             }
+            else
+            {
+                Console.WriteLine(args[0]);
+            }
+
 
             pt.Stop();
             Console.WriteLine("Duration : " + pt.Duration.ToString() + 's');
