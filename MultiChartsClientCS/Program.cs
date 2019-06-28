@@ -1,7 +1,7 @@
-﻿using System;
-using Win32;
-using MultiChartsCppWrapper;
+﻿using MultiChartsCppWrapper;
+using System;
 using System.Linq;
+using Win32;
 
 namespace MultiChartsClientCS
 {
