@@ -69,8 +69,8 @@ namespace MultiChartsClientCS
                 Console.WriteLine("Training the model on " + trainingSize + " elements");
                 Console.WriteLine(multiCharts.TrainModel());
 
-                multiCharts.SetTestingData(t_data.Take(testingSize).ToArray());
-                multiCharts.SetTestDateArrayUNIX(t_date.Take(testingSize).ToArray());
+                multiCharts.SetTestingData(t_data.Skip(trainingSize).Take(testingSize).ToArray());
+                multiCharts.SetTestDateArrayUNIX(t_date.Skip(trainingSize).Take(testingSize).ToArray());
 
                 Console.WriteLine("Testing the trained model on " + testingSize + " elements");
                 Console.WriteLine(multiCharts.TestModel());

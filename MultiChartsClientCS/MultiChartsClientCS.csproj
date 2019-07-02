@@ -76,6 +76,9 @@
   <PropertyGroup>
     <ApplicationIcon>noun_Machine Learning_1251118 %281%29.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="MultiChartsCLR">
       <HintPath>..\..\MultiChartsCLR\x64\Release\MultiChartsCLR.dll</HintPath>
