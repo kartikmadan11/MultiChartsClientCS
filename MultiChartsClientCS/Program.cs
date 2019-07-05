@@ -1,6 +1,8 @@
 ﻿using MultiChartsCppWrapper;
 using System;
+using System.IO;
 using System.Linq;
+using System.Web.Script.Serialization;
 using Win32;
 
 namespace MultiChartsClientCS
@@ -18,123 +20,58 @@ namespace MultiChartsClientCS
                 Environment.Exit(0);
             }
 
-            MultiChartsWrapper multiCharts = new MultiChartsWrapper();
+            MultiChartsWrapper multiChartsWrapper = new MultiChartsWrapper();
 
-            Console.WriteLine("Length of args: " + args[0].Length);
-            string[] splitArgs = args[0].Split(';');
-            Console.WriteLine("Command Line Args: " + splitArgs.Length);
-
-            if (splitArgs[0] == "train")
+            string json;
+            using(var rd = new StreamReader(args[0] + ".json"))
             {
+                json = rd.ReadToEnd();
+            }
 
-                string[] t_data_str = splitArgs[1].Split(',');
-                double[] t_data = new double[t_data_str.Length];
-                t_data = Array.ConvertAll(t_data_str, new Converter<string, double>(Double.Parse));
+            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            MultiCharts multiCharts = serializer.Deserialize<MultiCharts>(json);
 
-                string[] t_date_str = splitArgs[2].Split(',');
-                long[] t_date = new long[t_data_str.Length];
-                t_date = Array.ConvertAll(t_date_str, new Converter<string, long>(Int64.Parse));
+            if(multiCharts.action == "train")
+            {
+                Console.WriteLine("Feature Length: " + multiCharts.data.Length);
+                Console.WriteLine("FileName: " + multiCharts.fileName);
+                Console.WriteLine("Epochs: " + multiCharts.epochs);
+                Console.WriteLine("Learning Rate: " + multiCharts.learningRate);
+                Console.WriteLine("Momentum: " + multiCharts.momentum);
+                Console.WriteLine("Scale: " + multiCharts.scale);
+                Console.WriteLine("Optimizer Used: " + (multiCharts.optimizer == 0 ? "RMSProp" : "Adam"));
+                Console.WriteLine("Testing Part : " + multiCharts.testingPart + '%');
+                Console.WriteLine("Testing Weight : " + multiCharts.testingWeight + '%');
 
-                string fileName = splitArgs[3];
-                int epochs = int.Parse(splitArgs[4]);
-                double learningRate = double.Parse(splitArgs[5]);
-                double momentum = double.Parse(splitArgs[6]);
-                int scale = int.Parse(splitArgs[7]);
-                int optimizer = int.Parse(splitArgs[8]);
-                double testingPart = double.Parse(splitArgs[9]);
-                double testingWeight = double.Parse(splitArgs[10]);
+                int testingSize = (int)(multiCharts.testingPart / 100 * multiCharts.data.Length);
+                int trainingSize = multiCharts.data.Length - testingSize;
 
-                Console.WriteLine("Feature Length: " + t_data.Length);
-                Console.WriteLine("FileName: " + fileName);
-                Console.WriteLine("Epochs: " + epochs);
-                Console.WriteLine("Learning Rate: " + learningRate);
-                Console.WriteLine("Momentum: " + momentum);
-                Console.WriteLine("Scale: " + scale);
-                Console.WriteLine("Optimizer Used: " + (optimizer == 0 ? "RMSProp" : "Adam"));
-                Console.WriteLine("Testing Part : " + testingPart + '%');
-                Console.WriteLine("Testing Weight : " + testingWeight + '%');
-
-                int testingSize = (int)(testingPart / 100 * t_data.Length);
-                int trainingSize = t_data.Length - testingSize;
-
-                multiCharts.SetTrainingData(t_data.Take(trainingSize).ToArray());
-                multiCharts.SetDateArrayUNIX(t_date.Take(trainingSize).ToArray());
-                multiCharts.SetFileName(fileName);
-                multiCharts.SetEpochs(epochs);
-                multiCharts.SetLearningRate(learningRate);
-                multiCharts.SetMomentum(momentum);
-                multiCharts.SetScale(scale);
-                multiCharts.SetOptimizer(optimizer);
+                multiChartsWrapper.SetTrainingData(multiCharts.data.Take(trainingSize).ToArray());
+                multiChartsWrapper.SetDateArrayUNIX(multiCharts.date.Take(trainingSize).ToArray());
+                multiChartsWrapper.SetFileName(multiCharts.fileName);
+                multiChartsWrapper.SetEpochs(multiCharts.epochs);
+                multiChartsWrapper.SetLearningRate(multiCharts.learningRate);
+                multiChartsWrapper.SetMomentum(multiCharts.momentum);
+                multiChartsWrapper.SetScale(multiCharts.scale);
+                multiChartsWrapper.SetOptimizer(multiCharts.optimizer);
 
                 Console.WriteLine("Training the model on " + trainingSize + " elements");
-                Console.WriteLine(multiCharts.TrainModel());
+                Console.WriteLine(multiChartsWrapper.TrainModel());
 
-                multiCharts.SetTestingData(t_data.Skip(trainingSize).Take(testingSize).ToArray());
-                multiCharts.SetTestDateArrayUNIX(t_date.Skip(trainingSize).Take(testingSize).ToArray());
+                multiChartsWrapper.SetTestingData(multiCharts.data.Skip(trainingSize).Take(testingSize).ToArray());
+                multiChartsWrapper.SetTestDateArrayUNIX(multiCharts.date.Skip(trainingSize).Take(testingSize).ToArray());
 
                 Console.WriteLine("Testing the trained model on " + testingSize + " elements");
-                Console.WriteLine(multiCharts.TestModel());
+                Console.WriteLine(multiChartsWrapper.TestModel());
             }
 
-            else if(splitArgs[0] == "eval")
+            else if(multiCharts.action == "evaluate")
             {
 
-                int metrics = 3;
-                double testingWeight = double.Parse(splitArgs[1]);
-                string fileName = splitArgs[2];
-
-                multiCharts.SetTestingWeight(testingWeight);
-                multiCharts.SetFileName(fileName);
-
-                double[] eval = multiCharts.Evaluate(metrics);
-
-                if (eval.Length == 0)
-                    Console.WriteLine("Predictions not made");
-
-                else
-                {
-                    if (eval != null)
-                    {
-                        Console.WriteLine("Computing scores for testing weight : " + testingWeight);
-                        Console.WriteLine("Loss : " + eval[0]);
-                        Console.WriteLine("Mean Square Error: " + eval[1]);
-                        Console.WriteLine("R2 Score : " + eval[2]);
-                    }
-                }
             }
 
-            else if(splitArgs[0] == "forecast")
-            {
-                int ticks = int.Parse(splitArgs[1]);
-                long lastDateTime = long.Parse(splitArgs[2]);
-                long dateTimeDiff = long.Parse(splitArgs[3]);
-                string fileName = splitArgs[4];
-
-                multiCharts.SetFileName(fileName);
-                double[] pred = multiCharts.Predict(ticks);
-
-                if (pred.Length == 0)
-                    Console.WriteLine("Predictions not made");
-                
-                else
-                {
-                    if(pred != null)
-                    {
-                        for(int i = 0; i < pred.Length; i++)
-                        {
-                            Console.Write(new DateTime(1970, 1, 1, 5, 30, 0).AddSeconds(lastDateTime + (i+1)*dateTimeDiff));
-                            Console.WriteLine(" : " + pred[i]);
-                        }
-                    }
-                }
-
-            }
-            else
-            {
-                Console.WriteLine(args[0]);
-            }
-
-
+            Console.WriteLine("Length of args: " + args[0].Length);           
+            
             pt.Stop();
             Console.WriteLine("Duration : " + pt.Duration.ToString() + 's');
             Console.Write("Press any key to exit: ");
